@@ -15,7 +15,30 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from ninja import NinjaAPI, Schema
+
+from apidemo.visualize import visualizeData
+
+api = NinjaAPI()
+
+class Data(Schema):
+    title: str = ''
+    subtitle: str = ''
+    values: list = None
+    plot_type: str = None
+    categories: list = None
+
+class CustomSettings(Schema):
+    start: float = None
+    end: float = None
+    bins: float = None
+    category_amount: int = 10
+
+@api.post('/visualize')
+def visualizePost(request, data: Data = Data(), custom_settings: CustomSettings = CustomSettings()):
+    return visualizeData(data, custom_settings)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', api.urls)
 ]
