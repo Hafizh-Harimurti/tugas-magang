@@ -1,11 +1,18 @@
 import numpy as np
 
 invalid_data_code = {
-    1: 'Data and categories amount mismatch',
-    2: 'Invalid data type for plot type',
-    3: 'Data dimension(s) mismatch with plot type',
-    4: 'Empty data input(s)'
+    1: 'Values and categories amount mismatch',
+    2: 'Invalid values type for plot type',
+    3: 'Values dimension(s) mismatch with plot type',
+    4: 'Empty values input(s)',
+    5: 'Invalid plot type',
+    6: 'Missing values and/or plot_type input',
+    7: 'Values and data names amount mismatch',
+    8: 'Categories can only have one dimension input',
+    9: 'Data names can only have one dimension input',
 }
+
+available_plot_type = ['bar', 'hist', 'scatter', 'line', 'boxplot', 'pie']
 
 dimension_for_plot_type = {
     1: ['pie', 'hist'],
@@ -25,22 +32,17 @@ data_type_of_plot_type = {
 validate_list_max_depth = max(dimension_for_plot_type.keys())
 
 def visualizeData(data, custom_settings):
-    if type(data.values) is not list:
-        return {
-            'message': 'Data must be a list'
-        }
-    validation_result = validateData(data.values, data.plot_type, data.categories)
-    if validation_result != 0:
-        return {
-            'message': invalid_data_code[validation_result]
-        }
-    if data.categories is None:
+    if data.categories is None or len(data.categories) == 0:
         if data.plot_type in ['bar', 'line']:
             categories = [category_value for category_value in range(len(data.values[0]))]
         else:
             categories = [category_value for category_value in range(len(data.values))]
     else:
         categories = data.categories
+    if (data.data_names is None or len(data.data_names) == 0) and data.plot_type in ['bar', 'line', 'scatter', 'pie']:
+        data_names = [data_name_value for data_name_value in range(len(data.values))]
+    else:
+        data_names = data.data_names
     result = {
         'title': {
             'text': data.title,
@@ -48,21 +50,43 @@ def visualizeData(data, custom_settings):
             'left': 'center'
         },
         'dataset': setDataset(data.values, data.plot_type, categories, custom_settings),
-        'series': setSeries(data.values, data.plot_type)
+        'series': setSeries(data.values, data.plot_type, data_names, data.title),
+        'tooltip': setTooltip(data.plot_type),
+        'label': setLabel(data.plot_type)
     }
     if data.plot_type not in ['pie']:
         result['xAxis'] = setxAxis(data.plot_type)
         result['yAxis'] = setyAxis(data.plot_type)
+    if data.plot_type in ['bar', 'line', 'scatter', 'pie']:
+        result['legend'] = {
+            'orient': 'vertical',
+            'left': 'left'
+        }
+        result['grid'] = {
+            'left': 125
+        }
     return result
 
-def validateData(data, plot_type, categories):
-    validation_result = validateListItems(data, plot_type)
-    if categories is not None:
-        if plot_type in ['bar', 'line'] and len(data[0]) != len(categories):
-            validation_result = 1
-        elif len(data) != len(categories):
-            validation_result = 1
-    return validation_result
+def validateData(data):
+    if data.plot_type not in available_plot_type:
+        return 5
+    validation_result = validateListItems(data.values, data.plot_type)
+    if validation_result != 0:
+        return validation_result
+    if data.data_names is not None and len(data.data_names) != 0:
+        if any([type(data_name) is list for data_name in data.data_names]):
+            return 9
+        if data.plot_type in ['bar', 'line', 'scatter', 'pie'] and len(data.values) != len(data.data_names):
+            return 7
+    if data.categories is not None and len(data.categories) != 0:
+        if any([type(category) is list for category in data.categories]):
+            return 8
+        if data.plot_type in ['bar', 'line', 'scatter']:
+            if len(data.values[0]) != len(data.categories):
+                return 1
+        elif len(data.values) != len(data.categories):
+            return 1
+    return 0
 
 def validateListItems(data, plot_type, depth = 0):
     validation_result = 0
@@ -113,16 +137,40 @@ def setyAxis(plot_type):
     else: 
         return {}
 
-def setSeries(data, plot_type):
+def setTooltip(plot_type):
+    if plot_type in ['scatter']:
+        return {
+            'trigger': 'item',
+            'formatter': '{a}: ({c})'
+        }
+    elif plot_type in ['pie']:
+        return {
+            'trigger': 'item',
+            'formatter' : '{b}: {c} ({d}%)'
+        }
+    else:
+        return {
+            'trigger': 'item'
+        }
+
+def setLabel(plot_type):
+    if plot_type in ['pie']:
+        return {
+            'formatter': '{b}: {c} ({d}%)'
+        }
+    else:
+        return {}
+
+def setSeries(data, plot_type, data_names, title):
     if plot_type in ['hist']:
         return {
-            'name': 'histogram',
+            'name': title,
             'type': 'bar'
         }
     elif plot_type in ['boxplot']:
         return [
             {
-                'name': 'boxplot',
+                'name': title,
                 'type': 'boxplot',
                 'datasetId': 'boxplot_data',
                 'dimensions': ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum'],
@@ -132,24 +180,28 @@ def setSeries(data, plot_type):
             }
         ] + [
             {
-                'name': 'outliers',
+                'name': title,
                 'type': 'scatter',
                 'datasetId': 'boxplot_outliers'
             }       
         ]
     elif plot_type in ['pie']:
+        pie_data = list()
+        for data_index in range(len(data)):
+            pie_data.append({'value': data[data_index], 'name': data_names[data_index]})
         return {
-            'name': 'pie',
+            'name': title,
             'type': 'pie',
             'datasetId': 'pie_data',
-            'radius': '50%'
+            'radius': '50%',
+            'data': pie_data
         }
     elif plot_type in ['bar', 'line']:
         all_series = list()
         for line_index in range(len(data)):
             all_series.append(
                 {
-                    'name': plot_type + '_' + str(line_index),
+                    'name': data_names[line_index] if data_names else (plot_type + '_' + str(line_index)),
                     'type': plot_type,
                     'datasetId': plot_type +  '_' + str(line_index) + '_data'
                 }
@@ -157,12 +209,12 @@ def setSeries(data, plot_type):
         return all_series
     elif plot_type in ['scatter']:
         all_series = list()
-        for scatter_index in range(len(data)):
+        for line_index in range(len(data)):
             all_series.append(
                 {
-                    'name': 'scatter_' + str(scatter_index),
+                    'name': data_names[line_index] if data_names else ('scatter_' + str(line_index)),
                     'type': 'scatter',
-                    'datasetId': 'scatter_' + str(scatter_index) + '_data'
+                    'datasetId': 'scatter_' + str(line_index) + '_data'
                 }
             )
         return all_series
@@ -211,14 +263,6 @@ def setDataset(data, plot_type, categories, custom_settings):
                 'source': data_outliers
             }
         ]
-    elif plot_type in ['pie']:
-        pie_data = list()
-        for data_index in range(len(data)):
-            pie_data.append({'value': data[data_index], 'name': categories[data_index]})
-        return {
-            'id': 'pie_data',
-            'source': pie_data
-        }
     elif plot_type in ['bar', 'line']:
         datasets = list()
         for line_index in range(len(data)):
@@ -241,7 +285,7 @@ def setDataset(data, plot_type, categories, custom_settings):
             frequency_list.append([str(current_start) + '-' + str(current_start + hist_range), [current_start <= value < current_start + hist_range for value in data].count(True)])
             current_start += hist_range
             if current_start == max(data):
-                frequency_list[-1] += data.count(current_start)
+                frequency_list[-1][1] += data.count(current_start) 
             if current_start >= max(data):
                 break
         return {
@@ -250,11 +294,11 @@ def setDataset(data, plot_type, categories, custom_settings):
         }
     elif plot_type in ['scatter']:
         datasets = list()
-        for scatter_index in range(len(data)):
+        for line_index in range(len(data)):
             datasets.append(
                 {
-                    'id': 'scatter_' + str(scatter_index) + '_data',
-                    'source': data[scatter_index]
+                    'id': 'scatter_' + str(line_index) + '_data',
+                    'source': data[line_index]
                 }
             )
         return datasets

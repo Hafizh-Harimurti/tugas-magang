@@ -13,11 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from re import S
 from django.contrib import admin
 from django.urls import path
 from ninja import NinjaAPI, Schema
 
-from apidemo.visualize import visualizeData
+from apidemo.visualize import validateData, visualizeData, invalid_data_code
 
 api = NinjaAPI()
 
@@ -27,6 +28,7 @@ class Data(Schema):
     values: list = None
     plot_type: str = None
     categories: list = None
+    data_names: list = None
 
 class CustomSettings(Schema):
     start: float = None
@@ -34,9 +36,26 @@ class CustomSettings(Schema):
     bins: float = None
     category_amount: int = 10
 
-@api.post('/visualize')
+class ResponseMessage(Schema):
+    status: int
+    message: str
+
+class SuccessResponse(Schema):
+    status: int
+    message: str
+    payload: dict
+
+@api.post('/visualize', response = {200: SuccessResponse, 400: ResponseMessage, 500:  ResponseMessage})
 def visualizePost(request, data: Data = Data(), custom_settings: CustomSettings = CustomSettings()):
-    return visualizeData(data, custom_settings)
+    try:
+        validation_result = validateData(data)
+        if validation_result != 0:
+            return 400, {'status': 400, 'message': invalid_data_code[validation_result]}
+        else:
+            payload = visualizeData(data, custom_settings)
+        return 200, {'status': 200, 'message': 'OK', 'payload': payload}
+    except Exception as e:
+        return 500, {'status': 500, 'message': 'An unexpected error has occured'}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
