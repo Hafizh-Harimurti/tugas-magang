@@ -173,8 +173,10 @@ def setSeries(data, plot_type, data_names, title):
                 'name': title,
                 'type': 'boxplot',
                 'datasetId': 'boxplot_data',
-                'dimensions': ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum'],
+                'dimensions': ['Category', 'Minimum', 'Q1', 'Median', 'Q3', 'Maximum'],
                 'encode':{
+                    'x': ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum'],
+                    'y': ['Category'],
                     'tooltip': ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum']
                     }
             }
@@ -234,7 +236,7 @@ def setDataset(data, plot_type, categories, custom_settings):
             boxplot_min = boxplot_Q1 - 1.5*boxplot_iqr
             boxplot_max = boxplot_Q3 + 1.5*boxplot_iqr
             boxplot_outliers = data_array[(data_array < boxplot_Q1 - 1.5*boxplot_iqr) | (data_array > boxplot_Q3 + 1.5*boxplot_iqr)]
-            data_rows.append([categories[data_index], boxplot_min, boxplot_Q1, boxplot_median, boxplot_Q3, boxplot_max])
+            data_rows.append([str(categories[data_index]), boxplot_min, boxplot_Q1, boxplot_median, boxplot_Q3, boxplot_max])
             for outlier in boxplot_outliers:
                 data_outliers.append([categories[data_index], float(outlier)])
         ordered_datasets = list()
