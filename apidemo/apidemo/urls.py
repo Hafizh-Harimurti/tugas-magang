@@ -25,6 +25,8 @@ api = NinjaAPI()
 class Data(Schema):
     title: str = ''
     subtitle: str = ''
+    x_axis_name: str = ''
+    y_axis_name: str = ''
     values: list = None
     plot_type: str = None
     categories: list = None
@@ -55,7 +57,7 @@ def visualizePost(request, data: Data = Data(), custom_settings: CustomSettings 
             payload = visualizeData(data, custom_settings)
         return 200, {'status': 200, 'message': 'OK', 'payload': payload}
     except Exception as e:
-        return 500, {'status': 500, 'message': 'An unexpected error has occured'}
+        return 500, {'status': 500, 'message': 'An unexpected error has occured. Error: ' + str(e)}
 
 urlpatterns = [
     path('admin/', admin.site.urls),

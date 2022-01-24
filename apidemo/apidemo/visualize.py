@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 invalid_data_code = {
     1: 'Values and categories amount mismatch',
@@ -44,27 +45,19 @@ def visualizeData(data, custom_settings):
     else:
         data_names = data.data_names
     result = {
-        'title': {
-            'text': data.title,
-            'subtext': data.subtitle,
-            'left': 'center'
-        },
+        'title': setTitle(data.title, data.subtitle, data.plot_type),
         'dataset': setDataset(data.values, data.plot_type, categories, custom_settings),
         'series': setSeries(data.values, data.plot_type, data_names, data.title),
-        'tooltip': setTooltip(data.plot_type),
-        'label': setLabel(data.plot_type)
+        'tooltip': setTooltip(data.plot_type)
     }
-    if data.plot_type not in ['pie']:
-        result['xAxis'] = setxAxis(data.plot_type)
-        result['yAxis'] = setyAxis(data.plot_type)
-    if data.plot_type in ['bar', 'line', 'scatter', 'pie']:
-        result['legend'] = {
-            'orient': 'vertical',
-            'left': 'left'
-        }
-        result['grid'] = {
-            'left': 125
-        }
+    if data.plot_type in ['bar', 'line', 'scatter', 'boxplot', 'hist']:
+        result['xAxis'] = setxAxis(data.plot_type, data.x_axis_name)
+        result['yAxis'] = setyAxis(data.values, data.plot_type, data.y_axis_name)
+        result['grid'] = setGrid(data.plot_type)
+    if data.plot_type in ['pie']:
+        result['label'] = setLabel(data.plot_type)
+    if data.plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot']:
+        result['legend'] = setLegend(data.plot_type)
     return result
 
 def validateData(data):
@@ -109,32 +102,73 @@ def validateListItems(data, plot_type, depth = 0):
         return 4
     return validation_result
 
-def setxAxis(plot_type):
-    if plot_type in ['hist', 'line', 'bar']:
+def setTitle(title, subtitle, plot_type):
+    if plot_type in ['pie', 'bar', 'hist', 'scatter', 'line', 'boxplot']:
         return {
-            'type': 'category'
-        }
-    elif plot_type in ['scatter', 'boxplot']:
-        return {
-            'type': 'value'
+            'text': title,
+            'subtext': subtitle,
+            'left': 'center'
         }
     else:
         return {}
 
-def setyAxis(plot_type):
-    if plot_type in ['bar', 'scatter', 'line', 'hist']:
+def setxAxis(plot_type, x_axis_name):
+    if plot_type in ['hist', 'line', 'bar']:
         return {
-            'type': 'value'
+            'type': 'category',
+            'name': x_axis_name,
+            'nameLocation': 'start',
+            'nameGap': 30,
+            'nameRotate': 90,
+        }
+    elif plot_type in ['scatter', 'boxplot']:
+        return {
+            'type': 'value',
+            'name': x_axis_name,
+            'nameLocation': 'start',
+            'nameGap': 30,
+            'nameRotate': 90,
+        }
+    else:
+        return {}
+
+def setyAxis(data, plot_type, y_axis_name):
+    if plot_type in ['bar', 'hist', 'scatter']:
+        return {
+            'type': 'value',
+            'name': y_axis_name,
+            'nameLocation': 'start',
+            'nameGap': 30
         }
     elif plot_type in ['boxplot']:
         return {
             'type': 'category',
             'boundaryGap': 'true',
-            'splitArea': {
-                'show': 'false'
-            }
+            'name': y_axis_name,
+            'nameLocation': 'start',
+            'nameGap': 30
+        }
+    elif plot_type in ['line']:
+        return {
+            'type': 'value',
+            'name': y_axis_name,
+            'nameLocation': 'start',
+            'nameGap': 30,
+            'max': math.ceil(max([max(lineData) for lineData in data]) / 50 * 1.25) * 50
         }
     else: 
+        return {}
+
+def setGrid(plot_type):
+    if plot_type in ['bar', 'scatter', 'line', 'boxplot']:
+        return {
+            'top': '20%'
+        }
+    elif plot_type in ['hist']:
+        return {
+            'top': '10%'
+        }
+    else:
         return {}
 
 def setTooltip(plot_type):
@@ -146,17 +180,70 @@ def setTooltip(plot_type):
     elif plot_type in ['pie']:
         return {
             'trigger': 'item',
-            'formatter' : '{b}: {c} ({d}%)'
+            'formatter' : '{a}<br/>{b}: {c} ({d}%)'
         }
-    else:
+    elif plot_type in ['bar', 'line']:
+        return {
+            'trigger': 'axis'
+        }
+    elif plot_type in ['hist', 'boxplot']:
         return {
             'trigger': 'item'
+        }
+    else:
+        return {}
+
+def setLegend(plot_type):
+    if plot_type in ['pie', 'bar', 'scatter', 'line', 'boxplot']:
+        return {
+            'left': 'center',
+            'top': '10%'
+        }
+    elif plot_type in []:
+        return {
+            'left': 'center'
         }
 
 def setLabel(plot_type):
     if plot_type in ['pie']:
         return {
-            'formatter': '{b}: {c} ({d}%)'
+            'formatter': '{a|{a}}\n{hr|}\n  {b|{b}: } {c|{c}} {per|({d}%)}  ',
+            'backgroundColor': '#FAFAFA',
+            'borderColor': '#888888',
+            'borderWidth': 1,
+            'borderRadius': 4,
+            'rich':{
+                'a': {
+                    'color': '#505050',
+                    'lineHeight': 22,
+                    'align': 'center'
+                },
+                'hr': {
+                    'borderColor': '#888888',
+                    'width': '100%',
+                    'borderWidth': 1,
+                    'height': 0
+                },
+                'b': {
+                    'color': '#000000',
+                    'lineHeight': 33,
+                    'fontSize': 14,
+                    'fontWeight': 'bold',
+                    'align': 'center'
+                },
+                'c': {
+                    'color': '#000000',
+                    'fontSize': 14,
+                    'align': 'center'
+                },
+                'per': {
+                    'color': '#FFFFFF',
+                    'backgroundColor': '#5D5D5D',
+                    'borderRadius': 4,
+                    'padding': [3,4],
+                    'align': 'center'
+                }
+            }
         }
     else:
         return {}
@@ -170,7 +257,7 @@ def setSeries(data, plot_type, data_names, title):
     elif plot_type in ['boxplot']:
         return [
             {
-                'name': title,
+                'name': 'Boxplot',
                 'type': 'boxplot',
                 'datasetId': 'boxplot_data',
                 'dimensions': ['Category', 'Minimum', 'Q1', 'Median', 'Q3', 'Maximum'],
@@ -182,7 +269,7 @@ def setSeries(data, plot_type, data_names, title):
             }
         ] + [
             {
-                'name': title,
+                'name': 'Outliers',
                 'type': 'scatter',
                 'datasetId': 'boxplot_outliers'
             }       
@@ -195,7 +282,9 @@ def setSeries(data, plot_type, data_names, title):
             'name': title,
             'type': 'pie',
             'datasetId': 'pie_data',
-            'radius': '50%',
+            'radius': '80%',
+            'top': '20%',
+            'selectedMode': 'single',
             'data': pie_data
         }
     elif plot_type in ['bar', 'line']:
@@ -240,20 +329,22 @@ def setDataset(data, plot_type, categories, custom_settings):
             for outlier in boxplot_outliers:
                 data_outliers.append([categories[data_index], float(outlier)])
         ordered_datasets = list()
-        for value_index, boxplot_value in enumerate(['min','Q1','median','Q3','max']):
-            ordered_datasets.append(
-                {
-                    'id': boxplot_value + '_asc',
-                    'fromDatasetId': 'boxplot_data',
-                    'transform': {
-                        'type': 'sort',
-                        'config': {
-                            'dimension': value_index + 1,
-                            'order': 'asc'
-                        }
-                    }
-                }
-            )
+        #
+        #for value_index, boxplot_value in enumerate(['min','Q1','median','Q3','max']):
+        #    ordered_datasets.append(
+        #        {
+        #            'id': boxplot_value + '_asc',
+        #            'fromDatasetId': 'boxplot_data',
+        #            'transform': {
+        #                'type': 'sort',
+        #                'config': {
+        #                    'dimension': value_index + 1,
+        #                    'order': 'asc'
+        #                }
+        #            }
+        #        }
+        #    )
+        #
         return [
             {
                 'id': 'boxplot_data',
