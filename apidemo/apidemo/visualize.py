@@ -117,17 +117,21 @@ def setxAxis(plot_type, x_axis_name):
         return {
             'type': 'category',
             'name': x_axis_name,
-            'nameLocation': 'start',
+            'nameLocation': 'center',
             'nameGap': 30,
-            'nameRotate': 90,
+            'nameTextStyle': {
+                'fontSize': 14
+            }
         }
     elif plot_type in ['scatter', 'boxplot']:
         return {
             'type': 'value',
             'name': x_axis_name,
-            'nameLocation': 'start',
+            'nameLocation': 'center',
             'nameGap': 30,
-            'nameRotate': 90,
+            'nameTextStyle': {
+                'fontSize': 14
+            }
         }
     else:
         return {}
@@ -137,23 +141,32 @@ def setyAxis(data, plot_type, y_axis_name):
         return {
             'type': 'value',
             'name': y_axis_name,
-            'nameLocation': 'start',
-            'nameGap': 30
+            'nameLocation': 'center',
+            'nameGap': 30,
+            'nameTextStyle': {
+                'fontSize': 14
+            }
         }
     elif plot_type in ['boxplot']:
         return {
             'type': 'category',
             'boundaryGap': 'true',
             'name': y_axis_name,
-            'nameLocation': 'start',
-            'nameGap': 30
+            'nameLocation': 'center',
+            'nameGap': 30,
+            'nameTextStyle': {
+                'fontSize': 14
+            }
         }
     elif plot_type in ['line']:
         return {
             'type': 'value',
             'name': y_axis_name,
-            'nameLocation': 'start',
+            'nameLocation': 'center',
             'nameGap': 30,
+            'nameTextStyle': {
+                'fontSize': 14
+            },
             'max': math.ceil(max([max(lineData) for lineData in data]) / 50 * 1.25) * 50
         }
     else: 
