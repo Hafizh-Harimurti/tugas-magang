@@ -7,10 +7,12 @@ invalid_data_code = {
     3: 'Values dimension(s) mismatch with plot type',
     4: 'Empty values input(s)',
     5: 'Invalid plot type',
-    6: 'Missing values and/or plot_type input',
+    6: 'Missing values and/or plot type input',
     7: 'Values and data names amount mismatch',
     8: 'Categories can only have one dimension input',
     9: 'Data names can only have one dimension input',
+    10: 'Null values not allowed for plot type',
+    11: 'List cannot be filled with null values only'
 }
 
 available_plot_type = ['bar', 'hist', 'scatter', 'line', 'boxplot', 'pie']
@@ -29,6 +31,8 @@ data_type_of_plot_type = {
     'scatter': [float, int],
     'line': [float, int]
 }
+
+none_allowed_plot_type = ['bar', 'line']
 
 validate_list_max_depth = max(dimension_for_plot_type.keys())
 
@@ -84,6 +88,9 @@ def validateData(data):
 def validateListItems(data, plot_type, depth = 0):
     validation_result = 0
     if type(data) is list and depth < validate_list_max_depth and len(data) > 0:
+        data_array = np.array(data)
+        if len(data_array[data_array != None]) == 0:
+            return 11
         depth += 1
         for item in data:
             validation_result = validateListItems(item, plot_type, depth)
@@ -93,7 +100,13 @@ def validateListItems(data, plot_type, depth = 0):
         if depth not in dimension_for_plot_type.keys() or plot_type not in dimension_for_plot_type[depth]:
             return 3
         elif type(data) not in data_type_of_plot_type[plot_type]:
-            return 2
+            if data is None:
+                if plot_type in none_allowed_plot_type:
+                    return 0
+                else:
+                    return 10
+            else:
+                return 2
         else:
             return 0
     elif depth == validate_list_max_depth:
@@ -137,7 +150,7 @@ def setxAxis(plot_type, x_axis_name):
         return {}
 
 def setyAxis(data, plot_type, y_axis_name):
-    if plot_type in ['bar', 'hist', 'scatter']:
+    if plot_type in ['hist', 'scatter']:
         return {
             'type': 'value',
             'name': y_axis_name,
@@ -158,7 +171,11 @@ def setyAxis(data, plot_type, y_axis_name):
                 'fontSize': 14
             }
         }
-    elif plot_type in ['line']:
+    elif plot_type in ['line', 'bar']:
+        data_array = np.array(data)
+        data_max = np.amax(data_array[data_array != None])
+        data_max_log_floored = math.floor(math.log10(data_max))
+        plot_y_max = math.ceil(data_max / 10**data_max_log_floored * (1 + 10**(data_max_log_floored-6))) * 10**data_max_log_floored
         return {
             'type': 'value',
             'name': y_axis_name,
@@ -167,7 +184,7 @@ def setyAxis(data, plot_type, y_axis_name):
             'nameTextStyle': {
                 'fontSize': 14
             },
-            'max': math.ceil(max([max(lineData) for lineData in data]) / 50 * 1.25) * 50
+            'max': plot_y_max
         }
     else: 
         return {}
