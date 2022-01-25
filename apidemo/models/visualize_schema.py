@@ -6,7 +6,6 @@ class Data(Schema):
     x_axis_name: str = ''
     y_axis_name: str = ''
     values: list = None
-    plot_type: str = None
     categories: list = None
     data_names: list = None
 
@@ -19,8 +18,4 @@ class CustomSettings(Schema):
 class ResponseMessage(Schema):
     status: int
     message: str
-
-class SuccessResponse(Schema):
-    status: int
-    message: str
-    payload: dict
+    payload: dict = {}
