@@ -86,7 +86,7 @@ class VisualizeService():
             y_axis_option = {
                 'type': 'value',
                 'name': y_axis_name,
-                'nameLocation': 'center',
+                'nameLocation': 'end',
                 'nameGap': 30,
                 'nameTextStyle': {
                     'fontSize': 14
@@ -96,7 +96,7 @@ class VisualizeService():
             y_axis_option = {
                 'type': 'value',
                 'name': y_axis_name,
-                'nameLocation': 'center',
+                'nameLocation': 'end',
                 'nameGap': 30,
                 'nameTextStyle': {
                     'fontSize': 14
@@ -110,7 +110,7 @@ class VisualizeService():
                 'type': 'category',
                 'boundaryGap': 'true',
                 'name': y_axis_name,
-                'nameLocation': 'center',
+                'nameLocation': 'end',
                 'nameGap': 30,
                 'nameTextStyle': {
                     'fontSize': 14
@@ -124,7 +124,7 @@ class VisualizeService():
             y_axis_option = {
                 'type': 'value',
                 'name': y_axis_name,
-                'nameLocation': 'center',
+                'nameLocation': 'end',
                 'nameGap': 30,
                 'nameTextStyle': {
                     'fontSize': 14
