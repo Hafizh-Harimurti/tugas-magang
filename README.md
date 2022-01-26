@@ -5,6 +5,7 @@ API ini dapat digunakan untuk membuat bar plot, line plot, scatter plot, pie cha
 
 ### Struktur JSON secara umum:
 {
+
     "data": 
     {
         "title": (Judul grafik),
@@ -26,6 +27,7 @@ API ini dapat digunakan untuk membuat bar plot, line plot, scatter plot, pie cha
         "y_axis_start": (Batas minimum sumbu Y pada grafik),
         "y_axis_end": (Batas maksimum sumbu Y pada grafik)
     }
+    
 }
 
 ### Keluaran:
