@@ -18,10 +18,10 @@ class ValidateService():
             11: 'List cannot be filled with null values only'
         }
 
-        self.available_plot_type = ['bar', 'hist', 'scatter', 'line', 'boxplot', 'pie']
+        self.available_plot_type = ['bar', 'histogram', 'scatter', 'line', 'boxplot', 'pie']
 
         self.dimension_for_plot_type = {
-            1: ['pie', 'hist'],
+            1: ['pie', 'histogram'],
             2: ['bar', 'line', 'boxplot'],
             3: ['scatter']
         }
@@ -29,7 +29,7 @@ class ValidateService():
         self.data_type_of_plot_type = {
             'bar': [float, int],
             'pie': [float, int],
-            'hist': [float, int, str],
+            'histogram': [float, int, str],
             'boxplot': [float, int],
             'scatter': [float, int],
             'line': [float, int]

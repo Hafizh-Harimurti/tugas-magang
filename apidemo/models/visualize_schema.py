@@ -10,6 +10,10 @@ class Data(Schema):
     data_names: list = None
 
 class CustomSettings(Schema):
+    x_axis_start: float = None
+    x_axis_end: float = None
+    y_axis_start: float = None
+    y_axis_end: float = None
     start: float = None
     end: float = None
     bins: float = None
