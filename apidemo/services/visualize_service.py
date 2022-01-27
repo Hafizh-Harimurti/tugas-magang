@@ -183,41 +183,17 @@ class VisualizeService():
         label_option = {}
         if plot_type in ['pie']:
             label_option = {
-                'formatter': '{a|{a}}\n{hr|}\n  {b|{b}: } {c|{c}} {per|({d}%)}  ',
-                'backgroundColor': '#FAFAFA',
-                'borderColor': '#888888',
-                'borderWidth': 1,
-                'borderRadius': 4,
-                'rich':{
-                    'a': {
-                        'color': '#505050',
-                        'lineHeight': 22,
-                        'align': 'center'
-                    },
-                    'hr': {
-                        'borderColor': '#888888',
-                        'width': '100%',
-                        'borderWidth': 1,
-                        'height': 0
-                    },
-                    'b': {
-                        'color': '#000000',
-                        'lineHeight': 33,
-                        'fontSize': 14,
-                        'fontWeight': 'bold',
-                        'align': 'center'
-                    },
-                    'c': {
-                        'color': '#000000',
-                        'fontSize': 14,
-                        'align': 'center'
-                    },
-                    'per': {
-                        'color': '#FFFFFF',
-                        'backgroundColor': '#5D5D5D',
-                        'borderRadius': 4,
-                        'padding': [3,4],
-                        'align': 'center'
+                "formatter": "  {a|{b}: {c} ({d}%)}  ",
+                "backgroundColor": "#FAFAFA",
+                "borderColor": "#888888",
+                "borderWidth": 1,
+                "borderRadius": 4,
+                "rich": {
+                    "a": {
+                        "color": "#000000",
+                        "lineHeight": 33,
+                        "fontSize": 14,
+                        "align": "center"
                     }
                 }
             }
