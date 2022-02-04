@@ -77,7 +77,7 @@ Grafik ini dapat menampilkan banyak bar plot pada saat yang bersamaan.
 
 ### Keluaran dari Contoh:
 
-![Contoh Bar](https://user-images.githubusercontent.com/64583473/151127988-26c2aba3-2103-4a8a-a037-0646b5e1f387.png)
+![Contoh Bar Plot](https://user-images.githubusercontent.com/64583473/151127988-26c2aba3-2103-4a8a-a037-0646b5e1f387.png)
 
 ## Line Plot
 ### Endpoint:
@@ -121,7 +121,7 @@ Grafik ini dapat menampilkan banyak line plot pada saat yang bersamaan.
 
 ### Keluaran dari Contoh:
 
-![Contoh Line](https://user-images.githubusercontent.com/64583473/151128000-45fbc8e7-c3f2-460f-ab47-36411f7862ec.png)
+![Contoh Line Plot](https://user-images.githubusercontent.com/64583473/151128000-45fbc8e7-c3f2-460f-ab47-36411f7862ec.png)
 
 ## Scatter Plot
 ### Endpoint:
@@ -166,7 +166,7 @@ Grafik ini dapat menampilkan banyak scatter plot pada saat yang bersamaan.
 
 ### Keluaran dari Contoh:
 
-![Contoh Scatter](https://user-images.githubusercontent.com/64583473/151128006-e5a8febe-0ad1-4d88-a0b2-56bcf0edfd19.png)
+![Contoh Scatter Plot](https://user-images.githubusercontent.com/64583473/151128006-e5a8febe-0ad1-4d88-a0b2-56bcf0edfd19.png)
 
 ## Pie Chart
 ### Endpoint:
@@ -198,7 +198,7 @@ Grafik ini dapat menampilkan grafik pie chart.
 
 ### Keluaran dari Contoh:
 
-![Contoh Pie](https://user-images.githubusercontent.com/64583473/151128005-df20c819-2521-45e4-872d-c1eea0777418.png)
+![Contoh Pie Chart](https://user-images.githubusercontent.com/64583473/151292359-300705d8-d919-44d9-a55a-9831996df145.png)
 
 ## Histogram
 ### Endpoint:
