@@ -8,6 +8,7 @@ class Data(Schema):
     values: list = None
     categories: list = None
     data_names: list = None
+    show_legend: bool = True
 
 class CustomSettings(Schema):
     x_axis_start: float = None

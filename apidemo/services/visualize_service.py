@@ -26,10 +26,10 @@ class VisualizeService():
         if plot_type in ['bar', 'line', 'scatter', 'boxplot', 'histogram']:
             result['xAxis'] = self.set_x_axis(plot_type, data.x_axis_name, custom_settings)
             result['yAxis'] = self.set_y_axis(data.values, plot_type, data.y_axis_name, custom_settings)
-            result['grid'] = self.set_grid(plot_type)
+            result['grid'] = self.set_grid(plot_type, data.show_legend)
         if plot_type in ['pie']:
             result['label'] = self.set_label(plot_type)
-        if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot']:
+        if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot'] and data.show_legend:
             result['legend'] = self.set_legend(plot_type)
         return result
 
@@ -136,7 +136,7 @@ class VisualizeService():
                 y_axis_option['max'] = custom_settings.y_axis_end
         return y_axis_option
 
-    def set_grid(self, plot_type):
+    def set_grid(self, plot_type, show_legend):
         grid_option = {}
         if plot_type in ['bar', 'scatter', 'line', 'boxplot']:
             grid_option = {
