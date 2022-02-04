@@ -14,7 +14,8 @@ API ini dapat digunakan untuk membuat bar plot, line plot, scatter plot, pie cha
         "categories": (Kategori pada grafik),
         "data_names": (Nama untuk kumpulan nilai pada grafik),
         "x_axis_name": (Nama sumbu X pada grafik),
-        "y_axis_name": (Nama sumbu Y pada grafik)
+        "y_axis_name": (Nama sumbu Y pada grafik),
+        "show_legend": (Nilai true/false untuk menunjukkan legend pada grafik)
     },
     "custom_settings" : 
     {
@@ -55,6 +56,7 @@ Grafik ini dapat menampilkan banyak bar plot pada saat yang bersamaan.
 - y_axis_name: Diisi dengan nama sumbu Y grafik bar plot.
 - y_axis_start: Diisi dengan nilai batas minimum sumbu Y grafik bar plot.
 - y_axis_end: Diisi dengan nilai batas maksimum sumbu Y grafik bar plot.
+- show_legend: Diisi dengan nilai true atau false untuk penunjukkan legend. Secara default bernilai true.
 
 ### Contoh JSON:
 {
@@ -99,6 +101,7 @@ Grafik ini dapat menampilkan banyak line plot pada saat yang bersamaan.
 - y_axis_name: Diisi dengan nama sumbu Y grafik line plot.
 - y_axis_start: Diisi dengan nilai batas minimum sumbu Y grafik line plot.
 - y_axis_end: Diisi dengan nilai batas maksimum sumbu Y grafik line plot.
+- show_legend: Diisi dengan nilai true atau false untuk penunjukkan legend. Secara default bernilai true.
 
 ### Contoh JSON:
 {
@@ -144,6 +147,7 @@ Grafik ini dapat menampilkan banyak scatter plot pada saat yang bersamaan.
 - x_axis_end: Diisi dengan nilai batas maksimum sumbu X grafik scatter plot.
 - y_axis_start: Diisi dengan nilai batas minimum sumbu Y grafik scatter plot.
 - y_axis_end: Diisi dengan nilai batas maksimum sumbu Y grafik scatter plot.
+- show_legend: Diisi dengan nilai true atau false untuk penunjukkan legend. Secara default bernilai true.
 
 ### Contoh JSON:
 {
@@ -183,6 +187,7 @@ Grafik ini dapat menampilkan grafik pie chart.
 - title: Diisi dengan judul grafik pie chart.
 - subtitle: Diisi dengan sub judul grafik pie chart.
 - data_names: Diisi dengan nama tiap data dalam grafik pie chart.
+- show_legend: Diisi dengan nilai true atau false untuk penunjukkan legend. Secara default bernilai true.
 
 ### Contoh JSON:
 {
@@ -258,6 +263,7 @@ Grafik ini dapat menampilkan banyak boxplot pada saat yang bersamaan.
 - categories: Diisi dengan kategori (nilai-nilai pada sumbu Y) sesuai dengan jumlah data dalam boxplot.
 - x_axis_name: Diisi dengan nama sumbu X grafik scatter plot.
 - y_axis_name: Diisi dengan nama sumbu Y grafik scatter plot.
+- show_legend: Diisi dengan nilai true atau false untuk penunjukkan legend. Secara default bernilai true.
 
 ### Contoh JSON:
 {
