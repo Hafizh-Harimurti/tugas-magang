@@ -1,9 +1,9 @@
 from ninja import NinjaAPI
 from ninja.responses import codes_4xx
-from apidemo.controllers.controller_exception import BadRequest, InternalServerError, ResourceNotFound
-from apidemo.models.visualize_schema import Data, CustomSettings, ResponseMessage
-from apidemo.services.validate_service import ValidateService
-from apidemo.services.visualize_service import VisualizeService
+from visualizeapi.controllers.controller_exception import BadRequest, InternalServerError, ResourceNotFound
+from visualizeapi.models.visualize_schema import Data, CustomSettings, ResponseMessage
+from visualizeapi.services.validate_service import ValidateService
+from visualizeapi.services.visualize_service import VisualizeService
 
 visualize_service = VisualizeService()
 validate_service = ValidateService()

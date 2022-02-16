@@ -1,6 +1,6 @@
 import numpy as np
 
-from apidemo.controllers.controller_exception import BadRequest, ResourceNotFound
+from visualizeapi.controllers.controller_exception import BadRequest, ResourceNotFound
 
 class ValidateService():
     def __init__(self) -> None:

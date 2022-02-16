@@ -16,7 +16,7 @@ Including another URLconf
 from re import S
 from django.urls import path
 
-from apidemo.controllers.visualize_controller import visualize_api
+from visualizeapi.controllers.visualize_controller import visualize_api
 
 urlpatterns = [
     path('api/', visualize_api.urls)
