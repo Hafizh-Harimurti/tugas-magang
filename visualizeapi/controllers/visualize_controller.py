@@ -1,5 +1,4 @@
 from ninja import NinjaAPI
-from ninja.responses import codes_4xx
 from visualizeapi.controllers.controller_exception import BadRequest, InternalServerError, ResourceNotFound
 from visualizeapi.models.visualize_schema import Data, CustomSettings, ResponseMessage
 from visualizeapi.services.validate_service import ValidateService
