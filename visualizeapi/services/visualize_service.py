@@ -21,6 +21,7 @@ class VisualizeService():
             'title': self.set_title(data.title, data.subtitle, plot_type),
             'dataset': self.set_dataset(data.values, plot_type, categories, custom_settings),
             'series': self.set_series(data.values, plot_type, data_names, data.title),
+            'toolbox': self.set_toolbox(plot_type),
             'tooltip': self.set_tooltip(plot_type)
         }
         if plot_type in ['bar', 'line', 'scatter', 'boxplot', 'histogram']:
@@ -147,6 +148,41 @@ class VisualizeService():
                 'top': '10%'
             }
         return grid_option
+
+    def set_toolbox(self, plot_type):
+        toolbox_option = {}
+        if plot_type in ['pie']:
+            toolbox_option = {
+                'feature': {
+                    'saveAsImage': {}
+                }
+            }
+        elif plot_type in ['scatter']:
+            toolbox_option = {
+                'feature': {
+                    'dataZoom': {},
+                    'saveAsImage': {}
+                }
+            }
+        elif plot_type in ['line', 'bar', 'histogram']:
+            toolbox_option = {
+                'feature': {
+                    'dataZoom': {
+                        'yAxisIndex': 'none'
+                    },
+                    'saveAsImage': {}
+                }
+            }
+        elif plot_type in ['boxplot']:
+            toolbox_option = {
+                'feature': {
+                    'dataZoom': {
+                        'xAxisIndex': 'none'
+                    },
+                    'saveAsImage': {}
+                }
+            }
+        return toolbox_option
 
     def set_tooltip(self, plot_type):
         tooltip_option = {}
