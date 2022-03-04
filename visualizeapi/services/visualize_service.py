@@ -9,33 +9,37 @@ class VisualizeService():
         if data.categories is None or len(data.categories) == 0:
             if plot_type in ['bar', 'line']:
                 categories = [category_value for category_value in range(len(data.values[0]))]
+            elif plot_type in ['heatmap']:
+                categories = [[category_x_value for category_x_value in range(len(data.values[0]))], [category_y_value for category_y_value in range(len(data.values))]]
             else:
                 categories = [category_value for category_value in range(len(data.values))]
         else:
             categories = data.categories
-        if (data.data_names is None or len(data.data_names) == 0) and plot_type in ['bar', 'line', 'scatter', 'pie']:
+        if (data.data_names is None or len(data.data_names) == 0) and plot_type in ['bar', 'line', 'scatter', 'pie', 'bubble']:
             data_names = [data_name_value for data_name_value in range(len(data.values))]
         else:
             data_names = data.data_names
         result = {
             'title': self.set_title(data.title, data.subtitle, plot_type),
-            'dataset': self.set_dataset(data.values, plot_type, categories, custom_settings),
-            'series': self.set_series(data.values, plot_type, data_names, data.title),
+            'dataset': self.set_dataset(data.values, plot_type, categories, data_names, custom_settings),
+            'series': self.set_series(data.values, plot_type, data_names, data.title, custom_settings),
             'toolbox': self.set_toolbox(plot_type),
             'tooltip': self.set_tooltip(plot_type)
         }
-        if plot_type in ['bar', 'line', 'scatter', 'boxplot', 'histogram']:
-            result['xAxis'] = self.set_x_axis(plot_type, data.x_axis_name, custom_settings)
-            result['yAxis'] = self.set_y_axis(data.values, plot_type, data.y_axis_name, custom_settings)
-            result['grid'] = self.set_grid(plot_type, data.show_legend)
+        if plot_type in ['bar', 'line', 'scatter', 'boxplot', 'histogram', 'heatmap', 'bubble']:
+            result['xAxis'] = self.set_x_axis(plot_type, data.x_axis_name, categories, custom_settings)
+            result['yAxis'] = self.set_y_axis(data.values, plot_type, data.y_axis_name, categories, custom_settings)
+            result['grid'] = self.set_grid(plot_type)
         if plot_type in ['pie']:
             result['label'] = self.set_label(plot_type)
         if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot'] and data.show_legend:
             result['legend'] = self.set_legend(plot_type)
+        if plot_type in ['heatmap']:
+            result['visualMap'] = self.set_visual_map(plot_type, data.values)
         return result
 
     def set_title(self, title, subtitle, plot_type):
-        if plot_type in ['pie', 'bar', 'histogram', 'scatter', 'line', 'boxplot']:
+        if plot_type in ['pie', 'bar', 'histogram', 'scatter', 'line', 'boxplot', 'heatmap', 'bubble']:
             return {
                 'text': title,
                 'subtext': subtitle,
@@ -44,7 +48,7 @@ class VisualizeService():
         else:
             return {}
 
-    def set_dataset(self, data, plot_type, categories, custom_settings):
+    def set_dataset(self, data, plot_type, categories, data_names, custom_settings):
         dataset_option = {}
         if plot_type in ['boxplot']:
             data_rows = list()
@@ -112,9 +116,26 @@ class VisualizeService():
                     }
                 )
             dataset_option = datasets
+        elif plot_type in ['heatmap']:
+            modified_data = list()
+            for row_index, row_value in enumerate(data):
+                for column_index, column_value in enumerate(row_value):
+                    modified_data.append([column_index, row_index, column_value if column_value != 0 else '-'])
+            dataset_option = {
+                'id': 'heatmap_data',
+                'source': modified_data
+            }
+        elif plot_type in ['bubble']:
+            modified_data = list()
+            for line_index in range(len(data)):
+                modified_data.append([data[line_index][0], data[line_index][1], data[line_index][2], data_names[line_index]])
+            dataset_option = {
+                'id': 'bubble_data',
+                'source': modified_data
+            }
         return dataset_option
     
-    def set_series(self, data, plot_type, data_names, title):
+    def set_series(self, data, plot_type, data_names, title, custom_settings):
         series_option = {}
         if plot_type in ['histogram']:
             series_option = {
@@ -148,7 +169,6 @@ class VisualizeService():
             series_option = {
                 'name': title,
                 'type': 'pie',
-                'datasetId': 'pie_data',
                 'radius': '80%',
                 'top': '20%',
                 'selectedMode': 'single',
@@ -176,6 +196,26 @@ class VisualizeService():
                     }
                 )
             series_option = all_series
+        elif plot_type in ['heatmap']:
+            series_option = {
+                'name': title,
+                'type': 'heatmap',
+                'datasetId': 'heatmap_data',
+                'label': {
+                    'show': 'true'
+                }
+            }
+        elif plot_type in ['bubble']:
+            raw_symbol_size = np.array(data).T[2]
+            series_option = {
+                'name': title,
+                'type': 'scatter',
+                'datasetId': 'bubble_data',
+                'symbolSize': (np.sqrt(raw_symbol_size)).tolist(),
+                'label': {
+                    'show': 'true'
+                }
+            }
         return series_option
 
     def set_toolbox(self, plot_type):
@@ -186,7 +226,7 @@ class VisualizeService():
                     'saveAsImage': {}
                 }
             }
-        elif plot_type in ['scatter']:
+        elif plot_type in ['scatter', 'heatmap', 'bubble']:
             toolbox_option = {
                 'feature': {
                     'dataZoom': {},
@@ -229,13 +269,13 @@ class VisualizeService():
             tooltip_option = {
                 'trigger': 'axis'
             }
-        elif plot_type in ['histogram', 'boxplot']:
+        elif plot_type in ['histogram', 'boxplot', 'heatmap', 'bubble']:
             tooltip_option = {
                 'trigger': 'item'
             }
         return tooltip_option
 
-    def set_x_axis(self, plot_type, x_axis_name, custom_settings):
+    def set_x_axis(self, plot_type, x_axis_name, categories, custom_settings):
         x_axis_option = {}
         if plot_type in ['histogram', 'line', 'bar']:
             x_axis_option = {
@@ -257,7 +297,7 @@ class VisualizeService():
                     'fontSize': 14
                 }
             }
-        elif plot_type in ['scatter']:
+        elif plot_type in ['scatter', 'bubble']:
             x_axis_option = {
                 'type': 'value',
                 'name': x_axis_name,
@@ -270,9 +310,23 @@ class VisualizeService():
             }
             if custom_settings.x_axis_end is not None:
                 x_axis_option['max'] = custom_settings.x_axis_end
+        elif plot_type in ['heatmap']:
+            x_axis_option = {
+                'type': 'category',
+                'name': x_axis_name,
+                'nameLocation': 'center',
+                'nameGap': 30,
+                'nameTextStyle': {
+                    'fontSize': 14
+                },
+                'data': categories[0],
+                'splitArea': {
+                    'show': 'true'
+                }
+            }
         return x_axis_option
 
-    def set_y_axis(self, data, plot_type, y_axis_name, custom_settings):
+    def set_y_axis(self, data, plot_type, y_axis_name, categories, custom_settings):
         y_axis_option = {}
         if plot_type in ['histogram']:
             y_axis_option = {
@@ -284,7 +338,7 @@ class VisualizeService():
                     'fontSize': 14
                 }
             }
-        elif plot_type in ['scatter']:
+        elif plot_type in ['scatter', 'bubble']:
             y_axis_option = {
                 'type': 'value',
                 'name': y_axis_name,
@@ -326,17 +380,37 @@ class VisualizeService():
             }
             if custom_settings.y_axis_end is not None:
                 y_axis_option['max'] = custom_settings.y_axis_end
+        elif plot_type in ['heatmap']:
+            y_axis_option = {
+                'type': 'category',
+                'boundaryGap': 'true',
+                'name': y_axis_name,
+                'nameLocation': 'end',
+                'nameGap': 30,
+                'nameTextStyle': {
+                    'fontSize': 14
+                },
+                'splitArea':{
+                    'show': 'true'
+                },
+                'data': categories[1]
+            }
         return y_axis_option
 
-    def set_grid(self, plot_type, show_legend):
+    def set_grid(self, plot_type):
         grid_option = {}
-        if plot_type in ['bar', 'scatter', 'line', 'boxplot']:
+        if plot_type in ['bar', 'scatter', 'line', 'boxplot', 'bubble']:
             grid_option = {
                 'top': '20%'
             }
         elif plot_type in ['histogram']:
             grid_option = {
                 'top': '10%'
+            }
+        elif plot_type in ['heatmap']:
+            grid_option = {
+                'top': '15%',
+                'height': '50%'
             }
         return grid_option
     
@@ -368,3 +442,16 @@ class VisualizeService():
                 'top': '10%'
             }
         return legend_option
+
+    def set_visual_map(self, plot_type, data):
+        visual_map_option = {}
+        if plot_type in ['heatmap']:
+            visual_map_option = {
+                'min': 0,
+                'max': max([max(single_data) for single_data in data]),
+                'calculable': 'true',
+                'orient': 'horizontal',
+                'left': 'center',
+                'bottom': '15%'
+            }
+        return visual_map_option
