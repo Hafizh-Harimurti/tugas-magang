@@ -220,8 +220,8 @@ Grafik ini dapat menampilkan grafik histogram dari kumpulan data yang diberikan.
 - values: Diisi dengan array 1D berisi nilai-nilai untuk histogram.
 
 #### Opsional:
-- title: Diisi dengan judul grafik scatter plot.
-- subtitle: Diisi dengan sub judul grafik scatter plot.
+- title: Diisi dengan judul grafik histogram.
+- subtitle: Diisi dengan sub judul grafik histogram.
 - x_axis_name: Diisi dengan nama sumbu X grafik histogram.
 - y_axis_name: Diisi dengan nama sumbu Y grafik histogram.
 - start: Diisi dengan titik awal kalkulasi grafik histogram. Tidak bisa lebih besar atau sama dengan "end" atau nilai "start" dan "end" akan diabaikan.
@@ -258,14 +258,14 @@ Grafik ini dapat menampilkan banyak boxplot pada saat yang bersamaan.
 
 ### Pengisian JSON:
 #### Harus diisi:
-- values: Diisi dengan array 2D berisi nilai-nilai untuk bar plot dengan nilai dalam kelompok yang sama dimasukkan menjadi 1 baris.
+- values: Diisi dengan array 2D berisi nilai-nilai untuk boxplot dengan nilai dalam kelompok yang sama dimasukkan menjadi 1 baris.
 
 #### Opsional:
-- title: Diisi dengan judul grafik scatter plot.
-- subtitle: Diisi dengan sub judul grafik scatter plot.
+- title: Diisi dengan judul grafik boxplot.
+- subtitle: Diisi dengan sub judul grafik boxplot.
 - categories: Diisi dengan kategori (nilai-nilai pada sumbu Y) sesuai dengan jumlah data dalam boxplot.
-- x_axis_name: Diisi dengan nama sumbu X grafik scatter plot.
-- y_axis_name: Diisi dengan nama sumbu Y grafik scatter plot.
+- x_axis_name: Diisi dengan nama sumbu X grafik boxplot.
+- y_axis_name: Diisi dengan nama sumbu Y grafik boxplot.
 - show_legend: Diisi dengan nilai true atau false untuk penunjukkan legend. Secara default bernilai true.
 
 ### Contoh JSON:
@@ -286,3 +286,39 @@ Grafik ini dapat menampilkan banyak boxplot pada saat yang bersamaan.
 ### Keluaran dari Contoh:
 
 ![Contoh Boxplot](https://user-images.githubusercontent.com/64583473/155297007-42d52603-c6d8-4618-89fe-230aa2f6d552.png)
+
+## Heatmap
+### Endpoint:
+{url}/api/visualize/heatmap
+
+### Deskripsi:
+Grafik ini dapat menampilkan heatmap sesuai data yang diberikan.
+
+### Pengisian JSON:
+#### Harus diisi:
+- values: Diisi dengan array 2D berisi nilai-nilai untuk heatmap dengan nilai dalam satu kategori sumbu Y yang sama dimasukkan menjadi 1 baris.
+
+#### Opsional:
+- title: Diisi dengan judul grafik heatmap.
+- subtitle: Diisi dengan sub judul grafik heatmap.
+- categories: Diisi dengan kategori-kategori (nilai-nilai pada sumbu X dan Y) sesuai dengan data yang dimasukkan. Kategori dibuat dalam bentuk 2D dengan baris pertama diisi dengan kategori untuk sumbu X dan baris kedua diisi dengan kategori untuk sumbu Y.
+- x_axis_name: Diisi dengan nama sumbu X grafik heatmap.
+- y_axis_name: Diisi dengan nama sumbu Y grafik heatmap.
+
+### Contoh JSON:
+```
+{
+    "data": {
+        "title": "Petugas Aktif Shift Malam Toko A",
+        "subtitle": "1 Maret 2022",
+        "values": [[1, 3, 3, 0, 0, 0, 2, 2, 3, 0, 1, 2], [1, 1, 3, 3, 3, 3, 3, 0, 2, 3, 0, 1], [0, 2, 2, 1, 1, 0, 3, 2, 2, 1, 3, 1]],
+        "categories": [["19.00", "20.00", "21.00", "22.00", "23.00", "00.00", "01.00", "02.00", "03.00", "04.00", "05.00", "06.00"],["Pos Jaga", "Counter", "Kebersihan"]],
+        "x_axis_name": "Jam",
+        "y_axis_name": "Posisi"
+    }
+}
+```
+
+### Keluaran dari Contoh:
+
+![Contoh Heatmap](https://user-images.githubusercontent.com/64583473/156720668-897035fb-ed4f-43a9-92ec-fe3d7c938f3d.png)
