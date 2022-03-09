@@ -19,6 +19,7 @@ class CustomSettings(Schema):
     end: float = None
     bins: float = None
     category_amount: int = 10
+    orientation: str = 'vertical'
 
 class ResponseMessage(Schema):
     status: int

@@ -7,7 +7,7 @@ class VisualizeService():
 
     def visualize_data(self, data, plot_type, custom_settings):
         if data.categories is None or len(data.categories) == 0:
-            if plot_type in ['bar', 'line']:
+            if plot_type in ['bar', 'line', 'area']:
                 categories = [category_value for category_value in range(len(data.values[0]))]
             elif plot_type in ['heatmap']:
                 categories = [[category_x_value for category_x_value in range(len(data.values[0]))], [category_y_value for category_y_value in range(len(data.values))]]
@@ -15,7 +15,7 @@ class VisualizeService():
                 categories = [category_value for category_value in range(len(data.values))]
         else:
             categories = data.categories
-        if (data.data_names is None or len(data.data_names) == 0) and plot_type in ['bar', 'line', 'scatter', 'pie', 'bubble']:
+        if (data.data_names is None or len(data.data_names) == 0) and plot_type in ['bar', 'line', 'scatter', 'pie', 'bubble', 'area']:
             data_names = [data_name_value for data_name_value in range(len(data.values))]
         else:
             data_names = data.data_names
@@ -26,20 +26,20 @@ class VisualizeService():
             'toolbox': self.set_toolbox(plot_type),
             'tooltip': self.set_tooltip(plot_type)
         }
-        if plot_type in ['bar', 'line', 'scatter', 'boxplot', 'histogram', 'heatmap', 'bubble']:
-            result['xAxis'] = self.set_x_axis(plot_type, data.x_axis_name, categories, custom_settings)
+        if plot_type in ['bar', 'line', 'scatter', 'boxplot', 'histogram', 'heatmap', 'bubble', 'area']:
+            result['xAxis'] = self.set_x_axis(data.values, plot_type, data.x_axis_name, categories, custom_settings)
             result['yAxis'] = self.set_y_axis(data.values, plot_type, data.y_axis_name, categories, custom_settings)
             result['grid'] = self.set_grid(plot_type)
         if plot_type in ['pie']:
             result['label'] = self.set_label(plot_type)
-        if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot'] and data.show_legend:
+        if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot', 'area'] and data.show_legend:
             result['legend'] = self.set_legend(plot_type)
         if plot_type in ['heatmap']:
             result['visualMap'] = self.set_visual_map(plot_type, data.values)
         return result
 
     def set_title(self, title, subtitle, plot_type):
-        if plot_type in ['pie', 'bar', 'histogram', 'scatter', 'line', 'boxplot', 'heatmap', 'bubble']:
+        if plot_type in ['pie', 'bar', 'histogram', 'scatter', 'line', 'boxplot', 'heatmap', 'bubble', 'area']:
             return {
                 'text': title,
                 'subtext': subtitle,
@@ -77,7 +77,7 @@ class VisualizeService():
                     'source': data_outliers
                 }
             ]
-        elif plot_type in ['bar', 'line']:
+        elif plot_type in ['bar', 'line', 'area']:
             datasets = list()
             for line_index in range(len(data)):
                 data_row = list()
@@ -140,7 +140,8 @@ class VisualizeService():
         if plot_type in ['histogram']:
             series_option = {
                 'name': title,
-                'type': 'bar'
+                'type': 'bar',
+                'barWidth': '104%'
             }
         elif plot_type in ['boxplot']:
             series_option = [
@@ -150,8 +151,8 @@ class VisualizeService():
                     'datasetId': 'boxplot_data',
                     'dimensions': ['Category', 'Minimum', 'Q1', 'Median', 'Q3', 'Maximum'],
                     'encode':{
-                        'x': ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum'],
-                        'y': ['Category'],
+                        'x': ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum'] if custom_settings.orientation == 'horizontal' else ['Category'],
+                        'y': ['Category'] if custom_settings.orientation == 'horizontal' else ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum'],
                         'tooltip': ['Minimum', 'Q1', 'Median', 'Q3', 'Maximum']
                         }
                 }
@@ -182,6 +183,18 @@ class VisualizeService():
                         'name': data_names[line_index] if data_names else (plot_type + '_' + str(line_index)),
                         'type': plot_type,
                         'datasetId': plot_type +  '_' + str(line_index) + '_data'
+                    }
+                )
+            series_option = all_series
+        elif plot_type in ['area']:
+            all_series = list()
+            for line_index in range(len(data)):
+                all_series.append(
+                    {
+                        'name': data_names[line_index] if data_names else (plot_type + '_' + str(line_index)),
+                        'type': 'line',
+                        'datasetId': plot_type +  '_' + str(line_index) + '_data',
+                        'areaStyle': {}
                     }
                 )
             series_option = all_series
@@ -233,7 +246,7 @@ class VisualizeService():
                     'saveAsImage': {}
                 }
             }
-        elif plot_type in ['line', 'bar', 'histogram']:
+        elif plot_type in ['line', 'bar', 'histogram', 'area']:
             toolbox_option = {
                 'feature': {
                     'dataZoom': {
@@ -265,7 +278,7 @@ class VisualizeService():
                 'trigger': 'item',
                 'formatter' : '{a}<br/>{b}: {c} ({d}%)'
             }
-        elif plot_type in ['bar', 'line']:
+        elif plot_type in ['bar', 'line', 'area']:
             tooltip_option = {
                 'trigger': 'axis'
             }
@@ -275,21 +288,83 @@ class VisualizeService():
             }
         return tooltip_option
 
-    def set_x_axis(self, plot_type, x_axis_name, categories, custom_settings):
+    def set_x_axis(self, data, plot_type, x_axis_name, categories, custom_settings):
         x_axis_option = {}
-        if plot_type in ['histogram', 'line', 'bar']:
+        if plot_type in ['bar']:
+            if custom_settings.orientation == 'horizontal':
+                data_array = np.array(data)
+                data_max = np.amax(data_array[data_array != None])
+                data_max_log_floored = math.floor(math.log10(data_max))
+                plot_x_max = math.ceil(data_max / 10**data_max_log_floored * (1 + 10**(data_max_log_floored-6))) * 10**data_max_log_floored
+                x_axis_option = {
+                    'type': 'value',
+                    'name': x_axis_name,
+                    'nameLocation': 'end',
+                    'nameGap': 30,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    },
+                    'min': custom_settings.x_axis_start if custom_settings.x_axis_start is not None else 0,
+                    'max': plot_x_max
+                }
+                if custom_settings.x_axis_end is not None:
+                    x_axis_option['max'] = custom_settings.x_axis_end
+            else:
+                x_axis_option = {
+                    'type': 'category',
+                    'name': x_axis_name,
+                    'nameLocation': 'center',
+                    'nameGap': 30,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    }
+                }
+        elif plot_type in ['boxplot']:
+            if custom_settings.orientation == 'horizontal':
+                x_axis_option = {
+                    'type': 'value',
+                    'name': x_axis_name,
+                    'nameLocation': 'center',
+                    'nameGap': 30,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    }
+                }
+            else:
+                x_axis_option = {
+                    'type': 'category',
+                    'boundaryGap': 'true',
+                    'name': x_axis_name,
+                    'nameLocation': 'end',
+                    'nameGap': 30,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    }
+                }
+        elif plot_type in ['histogram']:
+            if custom_settings.orientation == 'horizontal':
+                x_axis_option = {
+                    'type': 'value',
+                    'name': x_axis_name,
+                    'nameLocation': 'end',
+                    'nameGap': 30,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    }
+                }
+            else:
+                x_axis_option = {
+                    'type': 'category',
+                    'name': x_axis_name,
+                    'nameLocation': 'center',
+                    'nameGap': 30,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    }
+                }
+        elif plot_type in ['line', 'area']:
             x_axis_option = {
                 'type': 'category',
-                'name': x_axis_name,
-                'nameLocation': 'center',
-                'nameGap': 30,
-                'nameTextStyle': {
-                    'fontSize': 14
-                }
-            }
-        elif plot_type in ['boxplot']:
-            x_axis_option = {
-                'type': 'value',
                 'name': x_axis_name,
                 'nameLocation': 'center',
                 'nameGap': 30,
@@ -328,41 +403,88 @@ class VisualizeService():
 
     def set_y_axis(self, data, plot_type, y_axis_name, categories, custom_settings):
         y_axis_option = {}
-        if plot_type in ['histogram']:
-            y_axis_option = {
-                'type': 'value',
-                'name': y_axis_name,
-                'nameLocation': 'end',
-                'nameGap': 30,
-                'nameTextStyle': {
-                    'fontSize': 14
+        if plot_type in ['bar']:
+            if custom_settings.orientation == 'horizontal':
+                y_axis_option = {
+                    'type': 'category',
+                    'name': y_axis_name,
+                    'nameLocation': 'center',
+                    'nameGap': 30,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    },
+                    'axisLabel':{
+                        'rotate': 90
+                    }
                 }
-            }
-        elif plot_type in ['scatter', 'bubble']:
-            y_axis_option = {
-                'type': 'value',
-                'name': y_axis_name,
-                'nameLocation': 'end',
-                'nameGap': 30,
-                'nameTextStyle': {
-                    'fontSize': 14
-                },
-                'min': custom_settings.y_axis_start if custom_settings.y_axis_start is not None else 0
-            }
-            if custom_settings.y_axis_end is not None:
-                y_axis_option['max'] = custom_settings.y_axis_end
+            else:
+                data_array = np.array(data)
+                data_max = np.amax(data_array[data_array != None])
+                data_max_log_floored = math.floor(math.log10(data_max))
+                plot_y_max = math.ceil(data_max / 10**data_max_log_floored * (1 + 10**(data_max_log_floored-6))) * 10**data_max_log_floored
+                y_axis_option = {
+                    'type': 'value',
+                    'name': y_axis_name,
+                    'nameLocation': 'end',
+                    'nameGap': 60,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    },
+                    'min': custom_settings.y_axis_start if custom_settings.y_axis_start is not None else 0,
+                    'max': plot_y_max
+                }
+                if custom_settings.y_axis_end is not None:
+                    y_axis_option['max'] = custom_settings.y_axis_end
         elif plot_type in ['boxplot']:
-            y_axis_option = {
-                'type': 'category',
-                'boundaryGap': 'true',
-                'name': y_axis_name,
-                'nameLocation': 'end',
-                'nameGap': 30,
-                'nameTextStyle': {
-                    'fontSize': 14
+            if custom_settings.orientation == 'horizontal':
+                y_axis_option = {
+                    'type': 'category',
+                    'boundaryGap': 'true',
+                    'name': y_axis_name,
+                    'nameLocation': 'end',
+                    'nameGap': 30,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    },
+                    'axisLabel':{
+                        'rotate': 90
+                    }
                 }
-            }
-        elif plot_type in ['line', 'bar']:
+            else:
+                y_axis_option = {
+                    'type': 'value',
+                    'name': y_axis_name,
+                    'nameLocation': 'center',
+                    'nameGap': 60,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    },
+                }
+        elif plot_type in ['histogram']:
+            if custom_settings.orientation == 'horizontal':
+                y_axis_option = {
+                    'type': 'category',
+                    'name': y_axis_name,
+                    'nameLocation': 'center',
+                    'nameGap': 30,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    },
+                    'axisLabel':{
+                        'rotate': 90
+                    }
+                }
+            else:
+                y_axis_option = {
+                    'type': 'value',
+                    'name': y_axis_name,
+                    'nameLocation': 'end',
+                    'nameGap': 60,
+                    'nameTextStyle': {
+                        'fontSize': 14
+                    }
+                }
+        elif plot_type in ['line', 'area']:
             data_array = np.array(data)
             data_max = np.amax(data_array[data_array != None])
             data_max_log_floored = math.floor(math.log10(data_max))
@@ -371,12 +493,25 @@ class VisualizeService():
                 'type': 'value',
                 'name': y_axis_name,
                 'nameLocation': 'end',
-                'nameGap': 30,
+                'nameGap': 60,
                 'nameTextStyle': {
                     'fontSize': 14
                 },
                 'min': custom_settings.y_axis_start if custom_settings.y_axis_start is not None else 0,
                 'max': plot_y_max
+            }
+            if custom_settings.y_axis_end is not None:
+                y_axis_option['max'] = custom_settings.y_axis_end
+        elif plot_type in ['scatter', 'bubble']:
+            y_axis_option = {
+                'type': 'value',
+                'name': y_axis_name,
+                'nameLocation': 'end',
+                'nameGap': 60,
+                'nameTextStyle': {
+                    'fontSize': 14
+                },
+                'min': custom_settings.y_axis_start if custom_settings.y_axis_start is not None else 0
             }
             if custom_settings.y_axis_end is not None:
                 y_axis_option['max'] = custom_settings.y_axis_end
@@ -399,13 +534,9 @@ class VisualizeService():
 
     def set_grid(self, plot_type):
         grid_option = {}
-        if plot_type in ['bar', 'scatter', 'line', 'boxplot', 'bubble']:
+        if plot_type in ['bar', 'scatter', 'line', 'histogram', 'boxplot', 'bubble', 'area']:
             grid_option = {
                 'top': '20%'
-            }
-        elif plot_type in ['histogram']:
-            grid_option = {
-                'top': '10%'
             }
         elif plot_type in ['heatmap']:
             grid_option = {
@@ -436,7 +567,7 @@ class VisualizeService():
 
     def set_legend(self, plot_type):
         legend_option = {}
-        if plot_type in ['pie', 'bar', 'scatter', 'line', 'boxplot']:
+        if plot_type in ['pie', 'bar', 'scatter', 'line', 'boxplot', 'area']:
             legend_option = {
                 'left': 'center',
                 'top': '10%'

@@ -20,13 +20,13 @@ class ValidateService():
             13: 'Categories of plot type only accepts two categories row'
         }
 
-        self.available_plot_type = ['bar', 'histogram', 'scatter', 'line', 'boxplot', 'pie', 'heatmap']
+        self.available_plot_type = ['bar', 'histogram', 'scatter', 'line', 'boxplot', 'pie', 'heatmap', 'area']
 
         #Under development: 'bubble'
 
         self.dimension_for_plot_type = {
             1: ['pie', 'histogram'],
-            2: ['bar', 'line', 'boxplot', 'heatmap', 'bubble'],
+            2: ['bar', 'line', 'boxplot', 'heatmap', 'bubble', 'area'],
             3: ['scatter']
         }
 
@@ -38,10 +38,11 @@ class ValidateService():
             'scatter': [float, int],
             'line': [float, int],
             'heatmap': [float, int],
-            'bubble': [float, int]
+            'bubble': [float, int],
+            'area': [float, int]
         }
 
-        self.none_allowed_plot_type = ['bar', 'line']
+        self.none_allowed_plot_type = ['bar', 'line', 'area']
 
         self.strict_value_length_of_plot_type = {
             'bar': 'Equal',
@@ -51,7 +52,8 @@ class ValidateService():
             'scatter': 2,
             'line': 'None',
             'heatmap': 'Equal',
-            'bubble': 3
+            'bubble': 3,
+            'area': 'None'
         }
 
         self.validate_list_max_depth = max(self.dimension_for_plot_type.keys())
@@ -76,7 +78,7 @@ class ValidateService():
             else:
                 if any([type(category) is list for category in data.categories]):
                     return 7
-            if plot_type in ['bar', 'line', 'scatter', 'bubble']:
+            if plot_type in ['bar', 'line', 'scatter', 'bubble', 'area']:
                 if len(data.values[0]) != len(data.categories):
                     return 5
             elif plot_type in ['heatmap']:
