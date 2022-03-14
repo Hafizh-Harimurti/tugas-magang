@@ -20,9 +20,7 @@ class ValidateService():
             13: 'Categories of plot type only accepts two categories row'
         }
 
-        self.available_plot_type = ['bar', 'histogram', 'scatter', 'line', 'boxplot', 'pie', 'heatmap', 'area']
-
-        #Under development: 'bubble'
+        self.available_plot_type = ['bar', 'histogram', 'scatter', 'line', 'boxplot', 'pie', 'heatmap', 'bubble', 'area']
 
         self.dimension_for_plot_type = {
             1: ['pie', 'histogram'],

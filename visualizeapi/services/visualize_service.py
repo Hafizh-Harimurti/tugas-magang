@@ -30,12 +30,16 @@ class VisualizeService():
             result['xAxis'] = self.set_x_axis(data.values, plot_type, data.x_axis_name, categories, custom_settings)
             result['yAxis'] = self.set_y_axis(data.values, plot_type, data.y_axis_name, categories, custom_settings)
             result['grid'] = self.set_grid(plot_type)
-        if plot_type in ['pie']:
+        if plot_type in ['pie', 'bubble']:
             result['label'] = self.set_label(plot_type)
+            result['labelLayout'] = self.set_label_layout(plot_type)
+            result['labelLine'] = self.set_label_line(plot_type)
+        if plot_type in ['pie', 'bubble']:
+            result['emphasis'] = self.set_emphasis(plot_type)
         if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot', 'area'] and data.show_legend:
             result['legend'] = self.set_legend(plot_type)
-        if plot_type in ['heatmap']:
-            result['visualMap'] = self.set_visual_map(plot_type, data.values)
+        if plot_type in ['heatmap', 'bubble']:
+            result['visualMap'] = self.set_visual_map(plot_type, data.values, custom_settings)
         return result
 
     def set_title(self, title, subtitle, plot_type):
@@ -65,13 +69,12 @@ class VisualizeService():
                 data_rows.append([str(categories[data_index]), boxplot_min, boxplot_Q1, boxplot_median, boxplot_Q3, boxplot_max])
                 for outlier in boxplot_outliers:
                     data_outliers.append([categories[data_index], float(outlier)])
-            ordered_datasets = list()
             dataset_option = [
                 {
                     'id': 'boxplot_data',
                     'source': data_rows
                 }
-            ] + ordered_datasets + [
+            ] + [
                 {
                     'id': 'boxplot_outliers',
                     'source': data_outliers
@@ -219,15 +222,11 @@ class VisualizeService():
                 }
             }
         elif plot_type in ['bubble']:
-            raw_symbol_size = np.array(data).T[2]
             series_option = {
                 'name': title,
                 'type': 'scatter',
                 'datasetId': 'bubble_data',
-                'symbolSize': (np.sqrt(raw_symbol_size)).tolist(),
-                'label': {
-                    'show': 'true'
-                }
+                'dimensions': ['X', 'Y', 'Value', 'Name']
             }
         return series_option
 
@@ -426,7 +425,7 @@ class VisualizeService():
                     'type': 'value',
                     'name': y_axis_name,
                     'nameLocation': 'end',
-                    'nameGap': 60,
+                    'nameGap': 30,
                     'nameTextStyle': {
                         'fontSize': 14
                     },
@@ -455,7 +454,7 @@ class VisualizeService():
                     'type': 'value',
                     'name': y_axis_name,
                     'nameLocation': 'center',
-                    'nameGap': 60,
+                    'nameGap': 30,
                     'nameTextStyle': {
                         'fontSize': 14
                     },
@@ -479,7 +478,7 @@ class VisualizeService():
                     'type': 'value',
                     'name': y_axis_name,
                     'nameLocation': 'end',
-                    'nameGap': 60,
+                    'nameGap': 30,
                     'nameTextStyle': {
                         'fontSize': 14
                     }
@@ -493,7 +492,7 @@ class VisualizeService():
                 'type': 'value',
                 'name': y_axis_name,
                 'nameLocation': 'end',
-                'nameGap': 60,
+                'nameGap': 30,
                 'nameTextStyle': {
                     'fontSize': 14
                 },
@@ -507,7 +506,7 @@ class VisualizeService():
                 'type': 'value',
                 'name': y_axis_name,
                 'nameLocation': 'end',
-                'nameGap': 60,
+                'nameGap': 30,
                 'nameTextStyle': {
                     'fontSize': 14
                 },
@@ -534,7 +533,7 @@ class VisualizeService():
 
     def set_grid(self, plot_type):
         grid_option = {}
-        if plot_type in ['bar', 'scatter', 'line', 'histogram', 'boxplot', 'bubble', 'area']:
+        if plot_type in ['bar', 'scatter', 'line', 'histogram', 'boxplot', 'area']:
             grid_option = {
                 'top': '20%'
             }
@@ -543,27 +542,65 @@ class VisualizeService():
                 'top': '15%',
                 'height': '50%'
             }
+        elif plot_type in ['bubble']:
+            grid_option = {
+                'top': '20%',
+                'right': '15%'
+            }
         return grid_option
     
     def set_label(self, plot_type):
         label_option = {}
         if plot_type in ['pie']:
             label_option = {
-                "formatter": "  {a|{b}: {c} ({d}%)}  ",
-                "backgroundColor": "#FAFAFA",
-                "borderColor": "#888888",
-                "borderWidth": 1,
-                "borderRadius": 4,
-                "rich": {
-                    "a": {
-                        "color": "#000000",
-                        "lineHeight": 33,
-                        "fontSize": 14,
-                        "align": "center"
+                'formatter': '  {a|{b}: {c} ({d}%)}  ',
+                'backgroundColor': '#FAFAFA',
+                'borderColor': '#888888',
+                'borderWidth': 1,
+                'borderRadius': 4,
+                'rich': {
+                    'a': {
+                        'color': '#000000',
+                        'lineHeight': 33,
+                        'fontSize': 14,
+                        'align': 'center'
                     }
                 }
             }
+        elif plot_type in ['bubble']:
+            label_option = {
+                'formatter': '{@Name}',
+                'show': True
+            }
         return label_option
+
+    def set_label_layout(self, plot_type):
+        label_layout_option = {}
+        if plot_type in ['bubble']:
+            label_layout_option = {
+                'x': '90%',
+                'moveOverlap': 'shiftY'
+            }
+        return label_layout_option
+
+    def set_label_line(self, plot_type):
+        label_line_option = {}
+        if plot_type in ['bubble']:
+            label_line_option = {
+                'show': True,
+                'lineStyle': {
+                    'color': '#BBBBBB'
+                }
+            }
+        return label_line_option
+
+    def set_emphasis(self, plot_type):
+        emphasis_option = {}
+        if plot_type in ['pie', 'bubble']:
+            emphasis_option = {
+                'focus': 'self'
+            }
+        return emphasis_option
 
     def set_legend(self, plot_type):
         legend_option = {}
@@ -574,15 +611,26 @@ class VisualizeService():
             }
         return legend_option
 
-    def set_visual_map(self, plot_type, data):
+    def set_visual_map(self, plot_type, data, custom_settings):
         visual_map_option = {}
         if plot_type in ['heatmap']:
             visual_map_option = {
-                'min': 0,
+                'min': min([min(single_data) for single_data in data]),
                 'max': max([max(single_data) for single_data in data]),
                 'calculable': 'true',
                 'orient': 'horizontal',
                 'left': 'center',
                 'bottom': '15%'
+            }
+        elif plot_type in ['bubble']:
+            bubble_size_data = np.array(data).T[2]
+            visual_map_option = {
+                'show': False,
+                'dimension': 'Value',
+                'min': min(bubble_size_data),
+                'max': max(bubble_size_data),
+                'inRange': {
+                    'symbolSize': [custom_settings.symbol_min, custom_settings.symbol_max]
+                }
             }
         return visual_map_option
