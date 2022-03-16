@@ -8,7 +8,6 @@ class Data(Schema):
     values: list = None
     categories: list = None
     data_names: list = None
-    show_legend: bool = True
 
 class CustomSettings(Schema):
     x_axis_start: float = None
@@ -22,6 +21,7 @@ class CustomSettings(Schema):
     symbol_size_min: int = 10
     symbol_size_max: int = 100
     orientation: str = 'vertical'
+    show_legend: bool = True
     enable_zoom: bool = True,
     enable_save: bool = True
 

@@ -76,7 +76,7 @@ class ValidateService():
             else:
                 if any([type(category) is list for category in data.categories]):
                     return 7
-            if plot_type in ['bar']:
+            if plot_type in ['bar', 'line', 'area']:
                 if len(data.values[0]) != len(data.categories):
                     return 5
             elif plot_type in ['heatmap']:

@@ -34,7 +34,7 @@ class VisualizeService():
             result['label'] = self.set_label(plot_type)
         if plot_type in ['pie']:
             result['emphasis'] = self.set_emphasis(plot_type)
-        if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot', 'bubble', 'area'] and data.show_legend:
+        if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot', 'bubble', 'area'] and custom_settings.show_legend:
             result['legend'] = self.set_legend(plot_type)
         if plot_type in ['heatmap', 'bubble']:
             result['visualMap'] = self.set_visual_map(plot_type, data.values, custom_settings)
@@ -232,7 +232,7 @@ class VisualizeService():
         toolbox_option = {}
         toolbox_feature = {}
         if custom_settings.enable_zoom:
-            if plot_type in ['scatter', 'heatmap', 'bubble']:
+            if plot_type in ['scatter', 'bubble']:
                 toolbox_feature['dataZoom'] = {}
             elif plot_type in ['line', 'bar', 'histogram', 'area']:
                 toolbox_feature['dataZoom'] = {
