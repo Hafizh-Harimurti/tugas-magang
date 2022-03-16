@@ -21,7 +21,7 @@ class CustomSettings(Schema):
     category_amount: int = 10
     symbol_size_min: int = 10
     symbol_size_max: int = 100
-    orientation: str = 'vertical',
+    orientation: str = 'vertical'
     enable_zoom: bool = True,
     enable_save: bool = True
 
