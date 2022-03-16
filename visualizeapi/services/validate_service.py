@@ -24,8 +24,8 @@ class ValidateService():
 
         self.dimension_for_plot_type = {
             1: ['pie', 'histogram'],
-            2: ['bar', 'line', 'boxplot', 'heatmap', 'bubble', 'area'],
-            3: ['scatter']
+            2: ['bar', 'line', 'boxplot', 'heatmap', 'area'],
+            3: ['scatter', 'bubble']
         }
 
         self.data_type_of_plot_type = {
@@ -65,7 +65,7 @@ class ValidateService():
         if data.data_names is not None and len(data.data_names) != 0:
             if any([type(data_name) is list for data_name in data.data_names]):
                 return 8
-            if plot_type in ['bar', 'line', 'scatter', 'pie', 'bubble'] and len(data.values) != len(data.data_names):
+            if plot_type in ['bar', 'line', 'scatter', 'pie', 'bubble', 'area'] and len(data.values) != len(data.data_names):
                 return 6
         if data.categories is not None and len(data.categories) != 0:
             if plot_type in ['heatmap']:
@@ -76,7 +76,7 @@ class ValidateService():
             else:
                 if any([type(category) is list for category in data.categories]):
                     return 7
-            if plot_type in ['bar', 'line', 'scatter', 'bubble', 'area']:
+            if plot_type in ['bar']:
                 if len(data.values[0]) != len(data.categories):
                     return 5
             elif plot_type in ['heatmap']:

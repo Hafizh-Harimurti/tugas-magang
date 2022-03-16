@@ -19,9 +19,11 @@ class CustomSettings(Schema):
     end: float = None
     bins: float = None
     category_amount: int = 10
-    symbol_min: int = 10
-    symbol_max: int = 100
-    orientation: str = 'vertical'
+    symbol_size_min: int = 10
+    symbol_size_max: int = 100
+    orientation: str = 'vertical',
+    enable_zoom: bool = True,
+    enable_save: bool = True
 
 class ResponseMessage(Schema):
     status: int

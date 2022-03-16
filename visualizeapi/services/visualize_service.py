@@ -23,34 +23,32 @@ class VisualizeService():
             'title': self.set_title(data.title, data.subtitle, plot_type),
             'dataset': self.set_dataset(data.values, plot_type, categories, data_names, custom_settings),
             'series': self.set_series(data.values, plot_type, data_names, data.title, custom_settings),
-            'toolbox': self.set_toolbox(plot_type),
+            'toolbox': self.set_toolbox(plot_type, custom_settings),
             'tooltip': self.set_tooltip(plot_type)
         }
         if plot_type in ['bar', 'line', 'scatter', 'boxplot', 'histogram', 'heatmap', 'bubble', 'area']:
             result['xAxis'] = self.set_x_axis(data.values, plot_type, data.x_axis_name, categories, custom_settings)
             result['yAxis'] = self.set_y_axis(data.values, plot_type, data.y_axis_name, categories, custom_settings)
             result['grid'] = self.set_grid(plot_type)
-        if plot_type in ['pie', 'bubble']:
+        if plot_type in ['pie']:
             result['label'] = self.set_label(plot_type)
-            result['labelLayout'] = self.set_label_layout(plot_type)
-            result['labelLine'] = self.set_label_line(plot_type)
-        if plot_type in ['pie', 'bubble']:
+        if plot_type in ['pie']:
             result['emphasis'] = self.set_emphasis(plot_type)
-        if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot', 'area'] and data.show_legend:
+        if plot_type in ['bar', 'line', 'scatter', 'pie', 'boxplot', 'bubble', 'area'] and data.show_legend:
             result['legend'] = self.set_legend(plot_type)
         if plot_type in ['heatmap', 'bubble']:
             result['visualMap'] = self.set_visual_map(plot_type, data.values, custom_settings)
         return result
 
     def set_title(self, title, subtitle, plot_type):
+        title_option = {}
         if plot_type in ['pie', 'bar', 'histogram', 'scatter', 'line', 'boxplot', 'heatmap', 'bubble', 'area']:
-            return {
+            title_option = {
                 'text': title,
                 'subtext': subtitle,
                 'left': 'center'
             }
-        else:
-            return {}
+        return title_option
 
     def set_dataset(self, data, plot_type, categories, data_names, custom_settings):
         dataset_option = {}
@@ -109,12 +107,12 @@ class VisualizeService():
                 'id': 'histogram_data',
                 'source': frequency_list
             }
-        elif plot_type in ['scatter']:
+        elif plot_type in ['scatter', 'bubble']:
             datasets = list()
             for line_index in range(len(data)):
                 datasets.append(
                     {
-                        'id': 'scatter_' + str(line_index) + '_data',
+                        'id': plot_type + '_' + str(line_index) + '_data',
                         'source': data[line_index]
                     }
                 )
@@ -126,14 +124,6 @@ class VisualizeService():
                     modified_data.append([column_index, row_index, column_value if column_value != 0 else '-'])
             dataset_option = {
                 'id': 'heatmap_data',
-                'source': modified_data
-            }
-        elif plot_type in ['bubble']:
-            modified_data = list()
-            for line_index in range(len(data)):
-                modified_data.append([data[line_index][0], data[line_index][1], data[line_index][2], data_names[line_index]])
-            dataset_option = {
-                'id': 'bubble_data',
                 'source': modified_data
             }
         return dataset_option
@@ -222,47 +212,39 @@ class VisualizeService():
                 }
             }
         elif plot_type in ['bubble']:
-            series_option = {
-                'name': title,
-                'type': 'scatter',
-                'datasetId': 'bubble_data',
-                'dimensions': ['X', 'Y', 'Value', 'Name']
-            }
+            all_series = list()
+            for line_index in range(len(data)):
+                all_series.append(
+                    {
+                        'name': data_names[line_index] if data_names else ('bubble_' + str(line_index)),
+                        'type': 'scatter',
+                        'datasetId': 'bubble_' + str(line_index) + '_data',
+                        'dimensions': ['X', 'Y', 'Value'],
+                        'encode': {
+                            'tooltip': ['X', 'Y', 'Value']
+                        }
+                    }
+                )
+            series_option = all_series
         return series_option
 
-    def set_toolbox(self, plot_type):
+    def set_toolbox(self, plot_type, custom_settings):
         toolbox_option = {}
-        if plot_type in ['pie']:
-            toolbox_option = {
-                'feature': {
-                    'saveAsImage': {}
+        toolbox_feature = {}
+        if custom_settings.enable_zoom:
+            if plot_type in ['scatter', 'heatmap', 'bubble']:
+                toolbox_feature['dataZoom'] = {}
+            elif plot_type in ['line', 'bar', 'histogram', 'area']:
+                toolbox_feature['dataZoom'] = {
+                    'yAxisIndex': 'none'
                 }
-            }
-        elif plot_type in ['scatter', 'heatmap', 'bubble']:
-            toolbox_option = {
-                'feature': {
-                    'dataZoom': {},
-                    'saveAsImage': {}
+            elif plot_type in ['boxplot']:
+                toolbox_feature['dataZoom'] = {
+                    'xAxisIndex': 'none'
                 }
-            }
-        elif plot_type in ['line', 'bar', 'histogram', 'area']:
-            toolbox_option = {
-                'feature': {
-                    'dataZoom': {
-                        'yAxisIndex': 'none'
-                    },
-                    'saveAsImage': {}
-                }
-            }
-        elif plot_type in ['boxplot']:
-            toolbox_option = {
-                'feature': {
-                    'dataZoom': {
-                        'xAxisIndex': 'none'
-                    },
-                    'saveAsImage': {}
-                }
-            }
+        if custom_settings.enable_save:
+            toolbox_feature['saveAsImage'] = {}
+        toolbox_option['feature'] = toolbox_feature
         return toolbox_option
 
     def set_tooltip(self, plot_type):
@@ -281,7 +263,7 @@ class VisualizeService():
             tooltip_option = {
                 'trigger': 'axis'
             }
-        elif plot_type in ['histogram', 'boxplot', 'heatmap', 'bubble']:
+        elif plot_type in ['histogram', 'boxplot', 'heatmap']:
             tooltip_option = {
                 'trigger': 'item'
             }
@@ -574,29 +556,9 @@ class VisualizeService():
             }
         return label_option
 
-    def set_label_layout(self, plot_type):
-        label_layout_option = {}
-        if plot_type in ['bubble']:
-            label_layout_option = {
-                'x': '90%',
-                'moveOverlap': 'shiftY'
-            }
-        return label_layout_option
-
-    def set_label_line(self, plot_type):
-        label_line_option = {}
-        if plot_type in ['bubble']:
-            label_line_option = {
-                'show': True,
-                'lineStyle': {
-                    'color': '#BBBBBB'
-                }
-            }
-        return label_line_option
-
     def set_emphasis(self, plot_type):
         emphasis_option = {}
-        if plot_type in ['pie', 'bubble']:
+        if plot_type in ['pie']:
             emphasis_option = {
                 'focus': 'self'
             }
@@ -604,7 +566,7 @@ class VisualizeService():
 
     def set_legend(self, plot_type):
         legend_option = {}
-        if plot_type in ['pie', 'bar', 'scatter', 'line', 'boxplot', 'area']:
+        if plot_type in ['pie', 'bar', 'scatter', 'line', 'boxplot', 'bubble', 'area']:
             legend_option = {
                 'left': 'center',
                 'top': '10%'
@@ -623,14 +585,16 @@ class VisualizeService():
                 'bottom': '15%'
             }
         elif plot_type in ['bubble']:
-            bubble_size_data = np.array(data).T[2]
+            bubble_size_data = list()
+            for data_group in data:
+                bubble_size_data.append(np.array(data_group).T[2])
             visual_map_option = {
                 'show': False,
                 'dimension': 'Value',
-                'min': min(bubble_size_data),
-                'max': max(bubble_size_data),
+                'min': np.min(bubble_size_data),
+                'max': np.max(bubble_size_data),
                 'inRange': {
-                    'symbolSize': [custom_settings.symbol_min, custom_settings.symbol_max]
+                    'symbolSize': [custom_settings.symbol_size_min, custom_settings.symbol_size_max]
                 }
             }
         return visual_map_option
