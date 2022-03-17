@@ -20,14 +20,17 @@ class ValidateService():
             13: 'Categories of plot type only accepts two categories row'
         }
 
+        #Available plot type for API call. Any plot type not in here will return code 404.
         self.available_plot_type = ['bar', 'histogram', 'scatter', 'line', 'boxplot', 'pie', 'heatmap', 'bubble', 'area']
 
+        #Dimension of values in data. Key determines how deep values of a plot type can get.
         self.dimension_for_plot_type = {
             1: ['pie', 'histogram'],
             2: ['bar', 'line', 'boxplot', 'heatmap', 'area'],
             3: ['scatter', 'bubble']
         }
 
+        #Allowed data type for data inside values array.
         self.data_type_of_plot_type = {
             'bar': [float, int],
             'pie': [float, int],
@@ -40,8 +43,12 @@ class ValidateService():
             'area': [float, int]
         }
 
+        #Plot type that allows None to exist inside values array.
         self.none_allowed_plot_type = ['bar', 'line', 'area']
 
+        #Allowed array length of the deepest array of values array.
+        #Equal means the length can vary but each array has to be the same length.
+        #None means the length can vary.
         self.strict_value_length_of_plot_type = {
             'bar': 'Equal',
             'pie': 'None',
@@ -54,19 +61,28 @@ class ValidateService():
             'area': 'None'
         }
 
+        #Max depth validate_list will go before returning an invalid code
         self.validate_list_max_depth = max(self.dimension_for_plot_type.keys())
     
     def validate_data(self, data, plot_type):
+
+        #Check if plot type is available
         if plot_type not in self.available_plot_type:
             return 1
+
+        #Check if values array is valid
         validation_result = self.validate_list_items(data.values, plot_type)
         if validation_result != 0:
             return validation_result
+
+        #Check if data names is valid for plot type and values
         if data.data_names is not None and len(data.data_names) != 0:
             if any([type(data_name) is list for data_name in data.data_names]):
                 return 8
             if plot_type in ['bar', 'line', 'scatter', 'pie', 'bubble', 'area'] and len(data.values) != len(data.data_names):
                 return 6
+
+        #Check if categories is valid for plot type and values
         if data.categories is not None and len(data.categories) != 0:
             if plot_type in ['heatmap']:
                 if len(data.categories) != 2:
@@ -93,6 +109,8 @@ class ValidateService():
             data_array = np.array(data, dtype = object)
             if len(data_array[data_array != None]) == 0:
                 return 10
+
+            #Check if array contains only allowed data type for plot type
             if depth+2 in self.dimension_for_plot_type.keys() and plot_type in self.dimension_for_plot_type[depth+2]:
                 if all([type(lower_data) == list for lower_data in data]):
                     lower_data_lengths = [len(lower_data) for lower_data in data]
@@ -103,11 +121,14 @@ class ValidateService():
                     elif self.strict_value_length_of_plot_type[plot_type] != 'None':
                         if not all([lower_data_length == self.strict_value_length_of_plot_type[plot_type] for lower_data_length in lower_data_lengths]):
                             return 12
+
             depth += 1
             for item in data:
                 validation_result = self.validate_list_items(item, plot_type, depth)
                 if validation_result != 0:
                     return validation_result
+
+        #Check if item's depth is valid for plot type
         elif depth > 0 and type(data) is not list:
             if depth not in self.dimension_for_plot_type.keys() or plot_type not in self.dimension_for_plot_type[depth]:
                 return 3
@@ -125,4 +146,5 @@ class ValidateService():
             return 3
         elif len(data) == 0:
             return 4
+            
         return validation_result

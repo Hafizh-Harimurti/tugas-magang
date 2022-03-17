@@ -39,12 +39,15 @@ def internal_server_error_exception(request, ex):
 @visualize_api.post('/visualize/{plot_type}', response = {200: ResponseMessage})
 def visualize_post(request, plot_type, data: Data = Data(), custom_settings: CustomSettings = CustomSettings()):
     try:
+        #Checks if data sent in valid
         validation_result = validate_service.validate_data(data, plot_type)
         if validation_result > 0:
             if validation_result == 1:
                 raise ResourceNotFound(validate_service.invalid_data_code[validation_result])
             else:
                 raise BadRequest(validate_service.invalid_data_code[validation_result])
+                
+        #Creates option and returns it
         payload = visualize_service.visualize_data(data, plot_type, custom_settings)
         return 200, {'status': 200, 'message': 'OK', 'payload': payload}
     except BadRequest as ex:

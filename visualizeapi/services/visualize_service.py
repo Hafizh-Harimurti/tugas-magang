@@ -6,6 +6,8 @@ class VisualizeService():
         pass
 
     def visualize_data(self, data, plot_type, custom_settings):
+
+        #Generate categories if no categories is sent
         if data.categories is None or len(data.categories) == 0:
             if plot_type in ['bar', 'line', 'area']:
                 categories = [category_value for category_value in range(len(data.values[0]))]
@@ -15,10 +17,14 @@ class VisualizeService():
                 categories = [category_value for category_value in range(len(data.values))]
         else:
             categories = data.categories
+
+        #Generate data names if no data names is sent
         if (data.data_names is None or len(data.data_names) == 0) and plot_type in ['bar', 'line', 'scatter', 'pie', 'bubble', 'area']:
             data_names = [data_name_value for data_name_value in range(len(data.values))]
         else:
             data_names = data.data_names
+
+        #Generate option
         result = {
             'title': self.set_title(data.title, data.subtitle, plot_type),
             'dataset': self.set_dataset(data.values, plot_type, categories, data_names, custom_settings),
@@ -38,6 +44,7 @@ class VisualizeService():
             result['legend'] = self.set_legend(plot_type)
         if plot_type in ['heatmap', 'bubble']:
             result['visualMap'] = self.set_visual_map(plot_type, data.values, custom_settings)
+
         return result
 
     def set_title(self, title, subtitle, plot_type):
@@ -585,6 +592,8 @@ class VisualizeService():
                 'bottom': '15%'
             }
         elif plot_type in ['bubble']:
+
+            #Adjusts bubble size in bubble plot
             bubble_size_data = list()
             for data_group in data:
                 bubble_size_data.append(np.array(data_group).T[2])
