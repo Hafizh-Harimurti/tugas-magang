@@ -102,7 +102,7 @@ Grafik ini dapat menampilkan banyak line plot pada saat yang bersamaan.
 
 ### Pengisian JSON:
 #### Harus diisi:
-- values: Diisi dengan array 2D berisi nilai-nilai untuk bar plot dengan nilai dalam kelompok yang sama dimasukkan menjadi 1 baris.
+- values: Diisi dengan array 2D berisi nilai-nilai untuk line plot dengan nilai dalam kelompok yang sama dimasukkan menjadi 1 baris.
 
 #### Opsional:
 - title: Diisi dengan judul grafik line plot.
@@ -152,7 +152,7 @@ Grafik ini dapat menampilkan banyak area plot pada saat yang bersamaan.
 
 ### Pengisian JSON:
 #### Harus diisi:
-- values: Diisi dengan array 2D berisi nilai-nilai untuk bar plot dengan nilai dalam kelompok yang sama dimasukkan menjadi 1 baris.
+- values: Diisi dengan array 2D berisi nilai-nilai untuk area plot dengan nilai dalam kelompok yang sama dimasukkan menjadi 1 baris.
 
 #### Opsional:
 - title: Diisi dengan judul grafik area plot.
