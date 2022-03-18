@@ -34,7 +34,7 @@ class ValidateService():
         self.data_type_of_plot_type = {
             'bar': [float, int],
             'pie': [float, int],
-            'histogram': [float, int, str],
+            'histogram': [float, int],
             'boxplot': [float, int],
             'scatter': [float, int],
             'line': [float, int],
