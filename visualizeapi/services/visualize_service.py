@@ -141,7 +141,8 @@ class VisualizeService():
             series_option = {
                 'name': title,
                 'type': 'bar',
-                'barWidth': '104%'
+                'barWidth': '104%',
+                'datasetId': 'histogram_data'
             }
         elif plot_type in ['boxplot']:
             series_option = [
